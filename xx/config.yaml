@@ -1,20 +1,17 @@
+name: Websupport DNS mistral
+description: Dynamic DNS (DDNS) service for Websupport.sk domains with automatic IP updates
 version: 1.0.0
 slug: websupport_dns_mistral
-name: Websupport DNS mistral
-description: >-
-  Dynamic DNS (DDNS) service for Websupport.sk domains with automatic IP updates
-url: https://github.com/home-assistant/addons/tree/master/websupport_dns
-type: dns
+
 arch:
-  - armhf
-  - armv7
-  - aarch64
   - amd64
+  - aarch64
+  - armv7
+  - armhf
   - i386
-hassio_api: true
 init: false
-image: homeassistant/{arch}-addon-websupport_dns
-host_network: true
+startup: application
+boot: auto
 map:
   - ssl:rw
 options:
@@ -35,7 +32,4 @@ schema:
   record_type: list(A|AAAA)
   ttl: int
   update_interval: int
-startup: services
-services:
-  - update: >-
-      Update DNS records immediately
+
