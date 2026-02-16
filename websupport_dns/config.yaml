@@ -11,6 +11,13 @@ slug: websupport_dns
 
 version: 0.1.0
 
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
+
 # Configuration options
 options:
   # API credentials
