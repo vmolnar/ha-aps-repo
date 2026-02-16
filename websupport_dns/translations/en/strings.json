@@ -1,0 +1,31 @@
+{
+  "title": "Websupport DNS",
+  "description": "Automatically update DNS A records on Websupport.sk",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Websupport DNS Configuration",
+        "description": "Configure the Websupport DNS integration to automatically update your DNS records."
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to Websupport API",
+      "invalid_auth": "Invalid API credentials",
+      "invalid_subdomains": "Please provide at least one subdomain",
+      "unknown": "Unknown error occurred"
+    }
+  },
+  "options": {
+    "scan_interval": "Update interval (minutes)",
+    "ttl": "DNS TTL (seconds)"
+  },
+  "fields": {
+    "api_key": "API Key",
+    "api_secret": "API Secret",
+    "domain": "Domain",
+    "subdomains": "Subdomains (comma separated)",
+    "base_url": "API Base URL",
+    "scan_interval": "Update Interval (minutes)",
+    "ttl": "TTL (seconds)"
+  }
+}
