@@ -1,6 +1,6 @@
 name: "Websupport DNS"
 description: "Automatically update Websupport.sk DNS A records with your public IP"
-version: "0.1.5"
+version: "0.1.6"
 slug: "websupport-dns"
 arch:
   - amd64
@@ -21,8 +21,8 @@ options:
   subdomains:
     - null
   base_url: "rest.websupport.sk"
-  scan_interval: 10
-  ttl: 3600
+  scan_interval: 30
+  ttl: 600
 schema:
   api_key: str
   api_secret: password
