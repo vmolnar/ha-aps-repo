@@ -7,8 +7,9 @@ name: Websupport DNS
 # Integration description
 description: Automatically update DNS A records on Websupport.sk
 
-# Configuration schema
-domain: websupport_dns
+slug: websupport_dns
+
+version: 0.1.0
 
 # Configuration options
 options:
