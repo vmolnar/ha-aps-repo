@@ -1,40 +1,73 @@
-# Websupport DNS Integration Configuration
-# This file defines the configuration schema for the Websupport DNS integration
+# Websupport DNS Integration Configuration Schema
+# This file defines the configuration options for the Websupport DNS integration
 
-# Main integration configuration
-websupport_dns:
+# Integration name (matches manifest.json domain)
+name: Websupport DNS
+
+# Integration description
+description: Automatically update DNS A records on Websupport.sk
+
+# Configuration schema
+domain: websupport_dns
+
+# Configuration options
+options:
   # API credentials
-  api_key: "your_api_key_here"
-  api_secret: "your_api_secret_here"
-  
+  api_key:
+    name: API Key
+    description: Your Websupport API key
+    required: true
+    type: string
+    
+  api_secret:
+    name: API Secret
+    description: Your Websupport API secret
+    required: true
+    type: string
+    
   # Domain configuration
-  domain: "example.com"
-  subdomains: "home,www,api"
-  
+  domain:
+    name: Domain
+    description: Your domain name (e.g., example.com)
+    required: true
+    type: string
+    
+  subdomains:
+    name: Subdomains
+    description: Comma-separated list of subdomains to update
+    required: true
+    type: string
+    default: ""
+    
   # API configuration
-  base_url: "rest.websupport.sk"
-  
+  base_url:
+    name: API Base URL
+    description: Websupport API base URL
+    required: false
+    type: string
+    default: "rest.websupport.sk"
+    
   # Update settings
-  scan_interval: 10
-  ttl: 3600
+  scan_interval:
+    name: Update Interval
+    description: Update interval in minutes
+    required: false
+    type: integer
+    default: 10
+    
+  ttl:
+    name: TTL
+    description: DNS TTL in seconds
+    required: false
+    type: integer
+    default: 3600
 
-# Configuration options that can be set via UI:
-# - api_key: Your Websupport API key
-# - api_secret: Your Websupport API secret
-# - domain: Your domain name (e.g., example.com)
-# - subdomains: Comma-separated list of subdomains to update
-# - base_url: Websupport API base URL (default: rest.websupport.sk)
-# - scan_interval: Update interval in minutes (default: 10)
-# - ttl: DNS TTL in seconds (default: 3600)
-
-# For production use, store sensitive data in secrets.yaml:
-# secrets.yaml:
-#   websupport_api_key: "your_api_key_here"
-#   websupport_api_secret: "your_api_secret_here"
-#
-# Then reference them in configuration.yaml:
+# Example configuration
 # websupport_dns:
-#   api_key: !secret websupport_api_key
-#   api_secret: !secret websupport_api_secret
-#   domain: "example.com"
-#   subdomains: "home,www,api"
+#   api_key: your_api_key_here
+#   api_secret: your_api_secret_here
+#   domain: example.com
+#   subdomains: home,www,api
+#   base_url: rest.websupport.sk
+#   scan_interval: 10
+#   ttl: 3600
