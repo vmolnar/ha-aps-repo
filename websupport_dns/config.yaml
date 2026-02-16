@@ -1,6 +1,6 @@
 name: "Websupport DNS"
 description: "Automatically update Websupport.sk DNS A records with your public IP"
-version: "0.1.0"
+version: "0.1.1"
 slug: "websupport-dns"
 arch:
   - amd64
