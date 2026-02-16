@@ -27,7 +27,6 @@ schema:
   api_key: str
   api_secret: password
   domain: str
-  subdomains: "list(str)"
   base_url: str
   scan_interval: "int(1,1440)"
   ttl: "int(60,86400)"
