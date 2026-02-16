@@ -1,74 +1,32 @@
-# Websupport DNS Integration Configuration Schema
-# This file defines the configuration options for the Websupport DNS integration
-
-# Integration name (matches manifest.json domain)
-name: Websupport DNS
-
-# Integration description
-description: Automatically update DNS A records on Websupport.sk
-
-slug: websupport_dns
-
-version: 0.1.0
-
-# Configuration options
+name: "Websupport DNS"
+description: "Automatically update Websupport.sk DNS A records with your public IP"
+version: "0.1.0"
+slug: "websupport-dns"
+arch:
+  - amd64
+  - aarch64
+  - armv7
+  - armhf
+  - i386
+init: false
+startup: application
+boot: auto
+map:
+  - type: share
+    read_only: false
 options:
-  # API credentials
-  api_key:
-    name: API Key
-    description: Your Websupport API key
-    required: true
-    type: string
-    
-  api_secret:
-    name: API Secret
-    description: Your Websupport API secret
-    required: true
-    type: string
-    
-  # Domain configuration
-  domain:
-    name: Domain
-    description: Your domain name (e.g., example.com)
-    required: true
-    type: string
-    
-  subdomains:
-    name: Subdomains
-    description: Comma-separated list of subdomains to update
-    required: true
-    type: string
-    default: ""
-    
-  # API configuration
-  base_url:
-    name: API Base URL
-    description: Websupport API base URL
-    required: false
-    type: string
-    default: "rest.websupport.sk"
-    
-  # Update settings
-  scan_interval:
-    name: Update Interval
-    description: Update interval in minutes
-    required: false
-    type: integer
-    default: 10
-    
-  ttl:
-    name: TTL
-    description: DNS TTL in seconds
-    required: false
-    type: integer
-    default: 3600
-
-# Example configuration
-# websupport_dns:
-#   api_key: your_api_key_here
-#   api_secret: your_api_secret_here
-#   domain: example.com
-#   subdomains: home,www,api
-#   base_url: rest.websupport.sk
-#   scan_interval: 10
-#   ttl: 3600
+  api_key: ""
+  api_secret: ""
+  domain: ""
+  subdomains: []
+  base_url: "rest.websupport.sk"
+  scan_interval: 10
+  ttl: 3600
+schema:
+  api_key: str
+  api_secret: password
+  domain: str
+  subdomains: "list(str)"
+  base_url: str
+  scan_interval: "int(1,1440)"
+  ttl: "int(60,86400)"
