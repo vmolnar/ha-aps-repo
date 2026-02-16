@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """Websupport DNS - Home Assistant Add-on."""
 
-import asyncio
 import json
 import logging
-import signal
 import sys
+import time
 
 from dns_manager import WebsupportDNSManager
 
@@ -37,64 +36,38 @@ def load_config() -> dict:
     return config
 
 
-async def run(config: dict) -> None:
-    """Main loop: update DNS records on an interval."""
-    manager = WebsupportDNSManager(
-        config["api_key"],
-        config["api_secret"],
-        config.get("base_url", "rest.websupport.sk"),
-    )
+def main() -> None:
+    config = load_config()
     interval = config.get("scan_interval", 10) * 60
     domain = config["domain"]
     subdomains = config["subdomains"]
     ttl = config.get("ttl", 3600)
 
-    try:
-        while True:
-            logger.info("Running DNS update for %s", domain)
-            try:
-                results = await manager.update_dns_records_for_subdomains(
-                    domain, subdomains, ttl
-                )
-                for r in results:
-                    if r["success"]:
-                        logger.info("Updated %s", r["subdomain"])
-                    else:
-                        logger.error("Failed %s: %s", r["subdomain"], r["error"])
-            except Exception:
-                logger.exception("Error during DNS update")
-
-            logger.info("Next update in %d minutes", interval // 60)
-            await asyncio.sleep(interval)
-    finally:
-        await manager.close()
-
-
-def main() -> None:
-    config = load_config()
     logger.info(
         "Config loaded: domain=%s subdomains=%s interval=%dm",
-        config["domain"],
-        config["subdomains"],
-        config.get("scan_interval", 10),
+        domain, subdomains, config.get("scan_interval", 10),
     )
 
-    loop = asyncio.new_event_loop()
+    manager = WebsupportDNSManager(
+        config["api_key"],
+        config["api_secret"],
+        config.get("base_url", "rest.websupport.sk"),
+    )
 
-    def shutdown(sig):
-        logger.info("Received %s, shutting down...", sig.name)
-        for task in asyncio.all_tasks(loop):
-            task.cancel()
+    while True:
+        logger.info("Running DNS update for %s", domain)
+        try:
+            results = manager.update_dns_records_for_subdomains(domain, subdomains, ttl)
+            for r in results:
+                if r["success"]:
+                    logger.info("Updated %s", r["subdomain"])
+                else:
+                    logger.error("Failed %s: %s", r["subdomain"], r["error"])
+        except Exception:
+            logger.exception("Error during DNS update")
 
-    for sig in (signal.SIGTERM, signal.SIGINT):
-        loop.add_signal_handler(sig, shutdown, sig)
-
-    try:
-        loop.run_until_complete(run(config))
-    except asyncio.CancelledError:
-        pass
-
-    logger.info("Add-on stopped")
+        logger.info("Next update in %d minutes", interval // 60)
+        time.sleep(interval)
 
 
 if __name__ == "__main__":
