@@ -1,7 +1,7 @@
-name: "RouterOS FW vmolnar"
+name: "RouterOS FW"
 description: "Script for create and update RouterOS FW to block unwanted traffic from risky IP addresses"
-version: "1.0.8"
-slug: "routeros_fw_vmolnar"
+version: "1.0.9"
+slug: "routeros_fw"
 init: false
 arch:
   - aarch64

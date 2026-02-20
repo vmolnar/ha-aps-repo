@@ -1,0 +1,24 @@
+name: "Meteogram OpenMeteo"
+description: "Meteogram using Open-Meteo data. Meteogram will be saved to /share/meteogram.png every 5m. Then, it can be copied by automation to www folder to make it available for visualisation."
+version: "1.1.5"
+slug: "meteogram_openmeteo"
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+map:
+  - type: share
+    read_only: False
+options:
+  latitude: 48.1486
+  longitude: 17.1077
+  location_name: "Bratislava, Slovakia"
+  timezone: "Europe/Bratislava"
+schema:
+  latitude: float
+  longitude: float
+  location_name: str
+  timezone: str
