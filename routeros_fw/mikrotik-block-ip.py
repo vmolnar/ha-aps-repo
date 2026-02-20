@@ -5,7 +5,18 @@ import requests
 import csv
 import io
 import sys
-import ipaddress 
+import ipaddress
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # --- Configuration ---
 # Address List Names
@@ -19,7 +30,7 @@ IP_DATA_URL = 'https://www.nirsoft.net/countryip/ru.csv'
 # --- Data Fetching Function (Unchanged) ---
 def get_russian_ip_ranges(url: str) -> list[str]:
     """Downloads the NirSoft CSV file, parses it, and returns a list of IP ranges."""
-    print(f"🌍 Downloading IP list from: {url}")
+    logger.info(f"Downloading IP list from: {url}")
     ip_ranges = []
     
     try:
@@ -43,14 +54,14 @@ def get_russian_ip_ranges(url: str) -> list[str]:
                 start_ip = row[0].strip()
                 ip_ranges.append(f"{start_ip}")
         
-        print(f"✅ Downloaded and parsed {len(ip_ranges)} IP range entries.")
+        logger.info(f"Downloaded and parsed {len(ip_ranges)} IP range entries.")
         return ip_ranges
         
     except requests.RequestException as e:
-        print(f"❌ Error downloading IP list: {e}", file=sys.stderr)
+        logger.error(f"Error downloading IP list: {e}")
         return []
     except Exception as e:
-        print(f"❌ Error parsing CSV data: {e}", file=sys.stderr)
+        logger.error(f"Error parsing CSV data: {e}")
         return []
 
 # --- Firewall Rule Check/Create Function (Unchanged) ---
@@ -60,7 +71,7 @@ def check_and_create_firewall_rule(api_connection):
     
     # Check for the INPUT rule
     if not firewall_resource.get(comment=FIREWALL_RULE_COMMENT):
-        print(f"🚧 Creating INPUT chain firewall rule: blocking traffic aimed at the router...")
+        logger.info(f"Creating INPUT chain firewall rule: blocking traffic aimed at the router...")
         firewall_resource.add(
             chain='input',
             action='drop',
@@ -68,12 +79,12 @@ def check_and_create_firewall_rule(api_connection):
             comment=FIREWALL_RULE_COMMENT
         )
     else:
-        print(f"✅ INPUT rule found.")
+        logger.info(f"INPUT rule found.")
 
     # Check for the FORWARD rule
     forward_comment = FIREWALL_RULE_COMMENT + '_FORWARD'
     if not firewall_resource.get(comment=forward_comment):
-        print(f"🚧 Creating FORWARD chain firewall rule: blocking transit traffic...")
+        logger.info(f"Creating FORWARD chain firewall rule: blocking transit traffic...")
         firewall_resource.add(
             chain='forward',
             action='drop',
@@ -81,9 +92,9 @@ def check_and_create_firewall_rule(api_connection):
             comment=forward_comment
         )
     else:
-        print(f"✅ FORWARD rule found.")
+        logger.info(f"FORWARD rule found.")
         
-    print("✅ Firewall rule check complete.")
+    logger.info("Firewall rule check complete.")
 
 # --- Helper Function for Deduplication and Reduction (Unchanged from previous update) ---
 def process_ip_lists(ip_ranges: list[str], ip_addresses: list[str]) -> list[str]:
@@ -132,13 +143,13 @@ def process_ip_lists(ip_ranges: list[str], ip_addresses: list[str]) -> list[str]
             except ValueError:
                 pass
 
-    print(f"   -> Found {len(all_networks)} IPv4 network objects for processing.")
+    logger.info(f"Found {len(all_networks)} IPv4 network objects for processing.")
     if ipv6_skipped > 0:
-        print(f"   -> Skipped {ipv6_skipped} IPv6 entries.")
+        logger.info(f"Skipped {ipv6_skipped} IPv6 entries.")
 
     # Deduplication and Aggregation
     final_networks = list(ipaddress.collapse_addresses(all_networks))
-    print(f"✨ Reduced to {len(final_networks)} unique, non-overlapping IPv4 networks.")
+    logger.info(f"Reduced to {len(final_networks)} unique, non-overlapping IPv4 networks.")
 
     # Final Formatting
     final_list = []
@@ -160,7 +171,7 @@ def main():
     """Main function to perform the safe address list update and firewall check."""
     
     # 1. Collect and Consolidate New Data
-    print("Collecting data from internet sources...")
+    logger.info("Collecting data from internet sources...")
     ip_ranges = get_russian_ip_ranges(IP_DATA_URL)
     ip_ranges += get_russian_ip_ranges("https://www.nirsoft.net/countryip/cn.csv")
     ip_ranges += get_russian_ip_ranges("https://www.nirsoft.net/countryip/by.csv")
@@ -172,17 +183,17 @@ def main():
     ip_addresses += get_russian_ip_ranges("https://lists.blocklist.de/lists/all.txt")
 
     if not ip_ranges and not ip_addresses:
-        print("🛑 No IP ranges or addresses to process. Exiting.")
+        logger.error("No IP ranges or addresses to process. Exiting.")
         return
 
-    print("\n⚙️ Starting IP list deduplication, consolidation, and IPv4 filtering...")
+    logger.info("Starting IP list deduplication, consolidation, and IPv4 filtering...")
     # new_ip_set is the source of truth from the internet
     new_ip_list = process_ip_lists(ip_ranges, ip_addresses)
     new_ip_set = set(new_ip_list)
-    print(f"✅ Final consolidated list (Source of Truth) contains {len(new_ip_set)} IPv4 entries.")
+    logger.info(f"Final consolidated list (Source of Truth) contains {len(new_ip_set)} IPv4 entries.")
     
     if not new_ip_set:
-        print("🛑 All entries were invalid or filtered out. Exiting.")
+        logger.error("All entries were invalid or filtered out. Exiting.")
         return
     
     # 2. Connect to Router and Get Current Data
@@ -196,11 +207,11 @@ def main():
             plaintext_login=True
         )
         api = api_pool.get_api()
-        print(f"\n✅ Successfully connected to MikroTik at {ROUTER_HOST}")
+        logger.info(f"\nSuccessfully connected to MikroTik at {ROUTER_HOST}")
 
         address_list_resource = api.get_resource('/ip/firewall/address-list')
 
-        print(f"💾 Retrieving current entries from '{ADDRESS_LIST_NAME_FINAL}' on MikroTik...")
+        logger.info(f"Retrieving current entries from '{ADDRESS_LIST_NAME_FINAL}' on MikroTik...")
         # Only retrieve entries that were added by this script (using the defined comment)
         mikrotik_entries = address_list_resource.get(
             list=ADDRESS_LIST_NAME_FINAL,
@@ -210,7 +221,7 @@ def main():
         # Create a set of addresses currently on the router and a dict for easy removal
         mikrotik_ip_set = set(entry['address'] for entry in mikrotik_entries)
         mikrotik_id_map = {entry['address']: entry['id'] for entry in mikrotik_entries}
-        print(f"   -> Found {len(mikrotik_ip_set)} existing entries with comment '{LIST_COMMENT}'.")
+        logger.info(f"Found {len(mikrotik_ip_set)} existing entries with comment '{LIST_COMMENT}'.")
 
         # 3. Calculate Differential Sync
         
@@ -220,29 +231,29 @@ def main():
         # Entries to ADD: addresses in new_ip_set but NOT in mikrotik_ip_set
         to_add = new_ip_set.difference(mikrotik_ip_set)
         
-        print(f"\n🔄 Sync Plan:")
-        print(f"   -> Entries to ADD: {len(to_add)}")
-        print(f"   -> Entries to REMOVE: {len(to_remove)}")
-        print(f"   -> Entries to KEEP (Unchanged): {len(new_ip_set.intersection(mikrotik_ip_set))}")
+        logger.info(f"\nSync Plan:")
+        logger.info(f"Entries to ADD: {len(to_add)}")
+        logger.info(f"Entries to REMOVE: {len(to_remove)}")
+        logger.info(f"Entries to KEEP (Unchanged): {len(new_ip_set.intersection(mikrotik_ip_set))}")
 
         # 4. Execute Sync Operations
 
         # A. Remove Stale Entries
         if to_remove:
-            print("❌ Removing stale entries from MikroTik list...")
+            logger.info("Removing stale entries from MikroTik list...")
             remove_count = 0
             for address in to_remove:
                 entry_id = mikrotik_id_map.get(address)
                 if entry_id:
                     address_list_resource.remove(id=entry_id)
                     remove_count += 1
-            print(f"   -> Successfully removed {remove_count} entries.")
+            logger.info(f"Successfully removed {remove_count} entries.")
         else:
-            print("✅ No entries to remove.")
+            logger.info("No entries to remove.")
 
         # B. Add New Entries
         if to_add:
-            print("➕ Adding new entries to MikroTik list...")
+            logger.info("Adding new entries to MikroTik list...")
             add_count = 0
             for address in to_add:
                 address_list_resource.add(
@@ -252,25 +263,25 @@ def main():
                 )
                 add_count += 1
                 if add_count % 500 == 0:
-                    print(f"   -> Added {add_count} entries...")
-            print(f"   -> Successfully added {add_count} entries.")
+                    logger.info(f"Added {add_count} entries...")
+            logger.info(f"Successfully added {add_count} entries.")
         else:
-            print("✅ No entries to add.")
+            logger.info("No entries to add.")
 
         # 5. Check/Create Firewall Rule
-        print("\nFiring up firewall check...")
+        logger.info("Firing up firewall check...")
         check_and_create_firewall_rule(api)
         
     except routeros_api.exceptions.RouterOsApiError as e:
-        print(f"❌ RouterOS API Error: {e}", file=sys.stderr)
+        logger.error(f"RouterOS API Error: {e}")
     except ConnectionRefusedError:
-        print(f"❌ Connection Refused: Check API port {ROUTER_PORT} access.", file=sys.stderr)
+        logger.error(f"Connection Refused: Check API port {ROUTER_PORT} access.")
     except Exception as e:
-        print(f"❌ An unexpected error occurred: {e}", file=sys.stderr)
+        logger.error(f"An unexpected error occurred: {e}")
     finally:
         if api_pool:
             api_pool.disconnect()
-            print("\nConnection closed.")
+            logger.info("\nConnection closed.")
 
 if __name__ == "__main__":
     main()

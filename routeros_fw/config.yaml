@@ -1,6 +1,6 @@
 name: "RouterOS FW vmolnar"
 description: "Script for create and update RouterOS FW to block unwanted traffic from risky IP addresses"
-version: "1.0.6"
+version: "1.0.7"
 slug: "routeros_fw_vmolnar"
 init: false
 arch:
@@ -13,7 +13,7 @@ map:
   - type: share
     read_only: False
 options:
-  host: "192.168.3.1"
+  host: "192.168.2.1"
   port: "8728"
   user: "api"
   passwd: "api"
