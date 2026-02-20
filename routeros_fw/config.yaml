@@ -1,6 +1,6 @@
 name: "RouterOS FW vmolnar"
 description: "Script for create and update RouterOS FW to block unwanted traffic from risky IP addresses"
-version: "1.0.7"
+version: "1.0.8"
 slug: "routeros_fw_vmolnar"
 init: false
 arch:
