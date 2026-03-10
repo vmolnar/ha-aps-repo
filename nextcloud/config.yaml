@@ -1,7 +1,7 @@
 name: "Nextcloud"
 description: "Simple Nextcloud setup using the official Docker image"
 version: "1.0.1"
-slug: "nextcloud"
+slug: "nextcloud_simple"
 init: false
 arch:
   - aarch64
