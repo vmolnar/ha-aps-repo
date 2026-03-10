@@ -9,10 +9,8 @@ arch:
   - armhf
   - armv7
   - i386
-map:
-  - type: share
-    read_only: False
 options:
+  database_type: "sqlite"
   mysql_host: "db"
   mysql_database: "nextcloud"
   mysql_user: "nextcloud"
@@ -21,6 +19,7 @@ options:
   nextcloud_admin_password: ""
   trusted_domains: ""
 schema:
+  database_type: list(sqlite|mysql)
   mysql_host: str
   mysql_database: str
   mysql_user: str

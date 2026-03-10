@@ -13,10 +13,11 @@ This is a simple Nextcloud addon for Home Assistant that provides a basic Nextcl
 
 Configure the addon through the Home Assistant UI with these options:
 
-- `mysql_host`: Database host (default: "db")
-- `mysql_database`: Database name (default: "nextcloud")
-- `mysql_user`: Database username (default: "nextcloud")
-- `mysql_password`: Database password
+- `database_type`: Database type (default: "sqlite", options: "sqlite" or "mysql")
+- `mysql_host`: Database host (default: "db", only used if database_type is "mysql")
+- `mysql_database`: Database name (default: "nextcloud", only used if database_type is "mysql")
+- `mysql_user`: Database username (default: "nextcloud", only used if database_type is "mysql")
+- `mysql_password`: Database password (only used if database_type is "mysql")
 - `nextcloud_admin_user`: Nextcloud admin username (default: "admin")
 - `nextcloud_admin_password`: Nextcloud admin password
 - `trusted_domains`: Space-separated list of trusted domains
@@ -30,8 +31,9 @@ Configure the addon through the Home Assistant UI with these options:
 
 ## Notes
 
-- This addon expects a separate MySQL/MariaDB database container/service to be available
-- The addon uses the share directory for persistent storage
+- **SQLite (default)**: No external database required - simple and easy to set up
+- **MySQL/MariaDB**: For better performance and scalability, requires a separate database container/service (mysql client not included in container)
+- The addon uses internal storage for persistent data
 - For production use, consider adding SSL/TLS termination through a reverse proxy
 - This is a basic setup - for advanced features, consider using the official Nextcloud Docker image directly
 

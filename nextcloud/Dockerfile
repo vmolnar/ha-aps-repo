@@ -5,7 +5,6 @@ FROM $BUILD_FROM
 RUN apk add --no-cache \
     bash \
     curl \
-    mariadb-client \
     nginx \
     php8 \
     php8-fpm \
@@ -30,6 +29,7 @@ RUN apk add --no-cache \
     php8-pdo \
     php8-pdo_mysql \
     php8-openssl \
+    php8-pdo_sqlite \
     supervisor
 
 # Install Nextcloud
