@@ -1,8 +1,10 @@
 """DNS Manager for Websupport.sk API."""
 
+import argparse
 import hashlib
 import hmac
 import logging
+import sys
 import time
 from datetime import datetime, timezone
 
@@ -104,3 +106,46 @@ class WebsupportDNSManager:
                 results.append({"subdomain": sub, "success": False, "error": str(e)})
 
         return results
+
+
+def main():
+    """CLI entry point for updating DNS records."""
+    parser = argparse.ArgumentParser(description='Run WebsupportDNSManager to update DNS records for subdomains.')
+    
+    # Add required CLI arguments
+    parser.add_argument('--api-key', required=True, type=str, help='Websupport API key')
+    parser.add_argument('--api-secret', required=True, type=str, help='Websupport API secret')
+    parser.add_argument('--domain', required=True, type=str, help='Domain name (e.g., example.com)')
+    parser.add_argument('--subdomains', required=True, type=str, help='Comma-separated list of subdomains (e.g., www,api,blog)')
+    parser.add_argument('--ttl', type=int, default=3600, help='TTL for DNS records (default: 3600)')
+    
+    args = parser.parse_args()
+    
+    # Initialize WebsupportDNSManager with CLI arguments
+    dns_manager = WebsupportDNSManager(api_key=args.api_key, api_secret=args.api_secret)
+    
+    # Parse subdomains from comma-separated string
+    subdomains_list = [s.strip() for s in args.subdomains.split(',')]
+    
+    # Update DNS records for subdomains
+    try:
+        results = dns_manager.update_dns_records_for_subdomains(
+            domain=args.domain,
+            subdomains=subdomains_list,
+            ttl=args.ttl
+        )
+        
+        # Print results
+        print("DNS update results:")
+        for result in results:
+            status = "SKIPPED" if result.get("skipped") else "UPDATED" if result.get("success") else "FAILED"
+            print(f"  {result['subdomain']}: {status}")
+            
+        print("\nSuccessfully updated DNS records for subdomains.")
+    except Exception as e:
+        print(f"Error updating DNS records: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
